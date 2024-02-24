@@ -45,7 +45,8 @@ export const BottomBar: React.FC = () => {
   }
 
   return (
-    <div className='fixed bottom-0 w-full flex items-center justify-center z-[100] title-bar !h-8 !rounded-none'>
+    <div className='fixed bottom-0 w-full flex items-center justify-center z-[100] title-bar !h-10 gap-2 !px-2 !rounded-none'>
+      <button>How Does This Work?</button>
       <button onClick={handleImportClick}>Import Bookmarks!</button>
       {/* Display the file name if available */}
       {fileName && <span className='text-white text-sm ml-4'>{fileName}</span>}
@@ -56,16 +57,7 @@ export const BottomBar: React.FC = () => {
         accept='.html'
         onChange={handleFileChange}
       />
-      <div className='bookmarks-container'>
-        {bookmarks.map((bookmark, index) => (
-          <div key={index} className='bookmark'>
-            <img src={bookmark.icon} alt='' width='16' height='16' />
-            <a href={bookmark.url} target='_blank' rel='noopener noreferrer'>
-              {bookmark.title}
-            </a>
-          </div>
-        ))}
-      </div>
+
       <span className='text-white text-sm ml-auto pr-4'>
         Made by Maxim Abdulkhalikov, 2024. Tech used: NextJS and xp.css library.
       </span>
