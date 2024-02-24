@@ -3,69 +3,98 @@
 import React, { useEffect, useState } from 'react'
 import { Icon } from '../icon/Icon'
 
-const icons = [
-  {
-    name: 'Internet Explorer',
-    iconImage: '/icons/trash.ico',
-    link: 'https://www.example.com',
-  },
-  {
-    name: 'Internet Expsloresr',
-    iconImage: '/icons/trash.ico',
-    link: 'https://www.example.com',
-  },
-]
-
 export const IconGrid: React.FC = () => {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
-  const [lastClick, setLastClick] = useState<{
-    name: string
+  const [expandedTitles, setExpandedTitles] = useState<Record<string, boolean>>(
+    {}
+  )
+  const [bookmarks, setBookmarks] = useState<
+    Array<{ title: string; url: string; icon: string }>
+  >([])
+  const [lastClickInfo, setLastClickInfo] = useState<{
+    title: string
     time: number
   } | null>(null)
 
   useEffect(() => {
+    const bookmarksData = localStorage.getItem('bookmarks')
+    if (bookmarksData) {
+      setBookmarks(JSON.parse(bookmarksData))
+    }
+
     const handleOutsideClick = () => {
-      setSelectedIcon(null)
+      if (selectedIcon) {
+        setExpandedTitles((prev) => ({ ...prev, [selectedIcon]: false }))
+        setSelectedIcon(null)
+      }
     }
-
     document.addEventListener('mousedown', handleOutsideClick)
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
-    }
-  }, [])
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [selectedIcon])
 
   const handleIconClick = (
     event: React.MouseEvent<HTMLDivElement>,
-    name: string,
-    link: string
+    title: string,
+    url: string
   ) => {
     event.stopPropagation()
-
     const now = Date.now()
-    if (lastClick && name === lastClick.name && now - lastClick.time < 300) {
-      // Treat as double-click
-      window.open(link, '_blank')
-      setSelectedIcon(null) // Optionally reset or leave selected
+
+    // Check for double-click
+    if (
+      lastClickInfo &&
+      title === lastClickInfo.title &&
+      now - lastClickInfo.time < 300
+    ) {
+      window.open(url, '_blank') // Open the URL on double-click
+      setLastClickInfo(null) // Reset last click info
     } else {
-      // Update lastClick with the current click info
-      setLastClick({ name, time: now })
-      // Treat as single click
-      setSelectedIcon(name)
+      // Handle as single click: set or toggle expansion
+      const isExpanded = !!(selectedIcon === title && expandedTitles[title])
+      if (selectedIcon !== title) {
+        if (selectedIcon) {
+          setExpandedTitles((prev) => ({ ...prev, [selectedIcon]: false }))
+        }
+        setSelectedIcon(title)
+        setExpandedTitles((prev) => ({ ...prev, [title]: true }))
+      } else {
+        setExpandedTitles((prev) => ({ ...prev, [title]: !isExpanded }))
+      }
+      setLastClickInfo({ title, time: now }) // Update last click info for double-click detection
     }
   }
 
+  const handleTrashClick = () => {
+    // Clear bookmarks from state and local storage
+    setBookmarks([])
+    localStorage.removeItem('bookmarks')
+  }
+
   return (
-    <div className='grid grid-cols-4 gap-4 z-[1] p-8'>
-      {icons.map((icon) => (
+    <div className='grid grid-cols-12 gap-2 z-[1] p-8'>
+      {bookmarks.map((bookmark) => (
         <Icon
-          key={icon.name}
-          name={icon.name}
-          iconImage={icon.iconImage}
-          isSelected={icon.name === selectedIcon}
-          onClick={(e) => handleIconClick(e, icon.name, icon.link)}
+          key={bookmark.title}
+          name={
+            expandedTitles[bookmark.title]
+              ? bookmark.title
+              : bookmark.title.length > 10
+              ? bookmark.title.substring(0, 10) + '...'
+              : bookmark.title
+          }
+          iconImage={bookmark.icon || '/icons/default.ico'}
+          isSelected={bookmark.title === selectedIcon}
+          onClick={(e) => handleIconClick(e, bookmark.title, bookmark.url)}
         />
       ))}
+      {/* Trash Icon */}
+      <Icon
+        key='Trash'
+        name='Trash'
+        iconImage='/icons/trash.ico'
+        isSelected={false}
+        onClick={handleTrashClick}
+      />
     </div>
   )
 }
