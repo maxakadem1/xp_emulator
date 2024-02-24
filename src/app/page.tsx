@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <main className='relative min-h-screen min-w-full flex items-start justify-start'>
       <IconGrid />
-      <Folder />
+      {/* <Folder /> */}
       <BottomBar />
       <Image
         src={imageXp}
