@@ -1,8 +1,11 @@
 'use client'
 import React, { useRef, useState } from 'react'
-import 'xp.css/dist/XP.css'
 
-export const BottomBar: React.FC = () => {
+interface BottomBarProps {
+  openTutorial: () => void
+}
+
+export const BottomBar: React.FC<BottomBarProps> = ({ openTutorial }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string | null>(null) // State to store the file name
   const [bookmarks, setBookmarks] = useState<
@@ -46,7 +49,7 @@ export const BottomBar: React.FC = () => {
 
   return (
     <div className='fixed bottom-0 w-full flex items-center justify-center z-[100] title-bar !h-10 gap-2 !px-2 !rounded-none'>
-      <button>How Does This Work?</button>
+      <button onClick={openTutorial}>How Does This Work?</button>
       <button onClick={handleImportClick}>Import Bookmarks!</button>
       {/* Display the file name if available */}
       {fileName && <span className='text-white text-sm ml-4'>{fileName}</span>}

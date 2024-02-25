@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
+import Draggable from 'react-draggable'
 
 interface IconProps {
   name: string
   iconImage?: string
   isSelected: boolean
-  // Update the onClick type to accept a React.MouseEvent argument
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 
@@ -16,16 +16,46 @@ export const Icon: React.FC<IconProps> = ({
   isSelected,
   onClick,
 }) => {
+  // State to determine if the element is being dragged
+  const [isDragging, setIsDragging] = useState(false)
+
+  // Enhanced click handler to prevent onClick action when dragging
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) {
+      onClick(e)
+    }
+    setIsDragging(false) // Reset drag state after click action
+  }
+
   return (
-    <div
-      className={`flex flex-col items-center justify-center w-20 h-20 cursor-pointer gap-2 ${
-        isSelected ? 'bg-blue-600' : 'bg-transparent'
-      }`}
-      // Pass the event to the onClick handler
-      onClick={(e) => onClick(e)}
+    <Draggable
+      onStart={() => setIsDragging(true)}
+      onStop={() => setIsDragging(false)}
     >
-      <img src={iconImage} alt={name} className='w-7 h-7' />
-      <span className='text-xs text-center text-white'>{name}</span>
-    </div>
+      <div
+        className={`flex flex-col items-center justify-center w-20 h-20 cursor-pointer gap-2`}
+        onClick={handleClick}
+      >
+        <img
+          style={{
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            KhtmlUserSelect: 'none',
+            MozUserSelect: 'none',
+            pointerEvents: 'none',
+          }}
+          src={iconImage}
+          alt={name}
+          className='w-7 h-7'
+        />
+        <span
+          className={`text-xs text-center text-white ${
+            isSelected ? 'bg-blue-600' : 'bg-transparent'
+          }`}
+        >
+          {name}
+        </span>
+      </div>
+    </Draggable>
   )
 }
